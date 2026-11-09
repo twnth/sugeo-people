@@ -50,6 +50,7 @@ export default function KakaoMap({ boxes = [], onBounds, onUserMove, onBox, onPo
     }
 
     let disposed = false
+    let resizeObserver: ResizeObserver | null = null
     const initialize = () => {
       if (disposed || !element.current || map.current || !window.kakao?.maps) return
       window.kakao.maps.load(() => {
@@ -60,6 +61,8 @@ export default function KakaoMap({ boxes = [], onBounds, onUserMove, onBox, onPo
           center: new maps.LatLng(center.lat, center.lng), level: 5,
         })
         map.current = instance
+        resizeObserver = new ResizeObserver(() => instance.relayout())
+        resizeObserver.observe(element.current)
         clusterer.current = new maps.MarkerClusterer({ map: instance, averageCenter: true, minLevel: 6 })
         const placeLocation = () => {
           if (!currentLocation.current || !element.current) {
@@ -122,6 +125,7 @@ export default function KakaoMap({ boxes = [], onBounds, onUserMove, onBox, onPo
     }
     return () => {
       disposed = true
+      resizeObserver?.disconnect()
       if (debounce.current) clearTimeout(debounce.current)
       clusterer.current?.clear()
       selection.current?.setMap(null)

@@ -19,6 +19,13 @@ bool sameOrigin(Uri uri) =>
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
+    statusBarColor: Color(0xFFFFFFFF),
+    statusBarIconBrightness: Brightness.dark,
+    statusBarBrightness: Brightness.light,
+    systemNavigationBarColor: Color(0xFFF7F7F1),
+    systemNavigationBarIconBrightness: Brightness.dark,
+  ));
   runApp(const ClothMapApp());
 }
 
@@ -55,7 +62,7 @@ class _ClothMapWebViewState extends State<ClothMapWebView> {
     super.initState();
     controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setBackgroundColor(const Color(0xFFF7FAF8))
+      ..setBackgroundColor(const Color(0xFFF7F7F1))
       ..setNavigationDelegate(
         NavigationDelegate(
           onNavigationRequest: onNavigationRequest,
@@ -163,6 +170,8 @@ class _ClothMapWebViewState extends State<ClothMapWebView> {
       if (!didPop) unawaited(goBack());
     },
     child: Scaffold(
+      resizeToAvoidBottomInset: true,
+      backgroundColor: const Color(0xFFF7F7F1),
       body: SafeArea(
         child: Stack(
           children: [

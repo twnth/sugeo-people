@@ -34,6 +34,7 @@ export default function Home() {
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
   const [sourceFilter, setSourceFilter] = useState<SourceFilter>('ALL')
+  const [showMapTip, setShowMapTip] = useState(false)
   const [loaded, setLoaded] = useState(false)
   const sourceFilterRef = useRef<SourceFilter>('ALL')
   const lastBounds = useRef<Bounds | null>(null)
@@ -147,6 +148,12 @@ export default function Home() {
     locateRef.current()
   }, [])
 
+  useEffect(() => {
+    if (!message || message.includes('찾는 중')) return
+    const timer = window.setTimeout(() => setMessage(''), 4500)
+    return () => window.clearTimeout(timer)
+  }, [message])
+
   const searchAddress = () => {
     following.current = false
     nearbyMode.current = false
@@ -182,19 +189,27 @@ export default function Home() {
         <button onClick={searchAddress} className="rounded-xl bg-leaf px-4 py-2 font-semibold text-white">검색</button>
       </div>
       {error && <p className="mt-2 rounded-xl bg-white p-3 text-sm text-red-600 shadow">{error}</p>}
-      {message && <p className="mt-2 rounded-xl bg-white p-3 text-sm shadow" onClick={() => setMessage('')}>{message}</p>}
       <div className="mt-2 flex w-fit max-w-full gap-1 rounded-2xl bg-white/95 p-1 shadow" role="group" aria-label="수거함 위치 출처 선택">
         {sourceOptions.map(option => <button key={option.value} type="button" aria-pressed={sourceFilter === option.value} onClick={() => changeSource(option.value)} className={`rounded-xl px-3 py-2 text-xs font-semibold transition-colors sm:text-sm ${sourceFilter === option.value ? 'bg-ink text-white' : 'text-ink hover:bg-cream'}`}>{option.label}</button>)}
       </div>
-      <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 rounded-xl bg-white/95 px-3 py-2 text-xs text-ink shadow">
-        {sourceFilter !== 'USER' && <span className="inline-flex items-center gap-1.5"><i className="h-2.5 w-2.5 rounded-full bg-[#20845a]" />공공자료</span>}
-        {sourceFilter !== 'PUBLIC' && <span className="inline-flex items-center gap-1.5"><i className="h-2.5 w-2.5 rounded-full bg-[#2878e5]" />사용자 제보</span>}
-        {sourceFilter === 'PUBLIC' && <span>공공자료 좌표는 실제 설치 위치와 다를 수 있어요</span>}
-        {sourceFilter === 'USER' && <span>관리자가 승인한 신규 위치 제보만 표시해요</span>}
-        {loaded && <span className="font-semibold">{visibleBoxes.length}곳</span>}
-      </div>
       <Link href="/move-out" className="mt-2 inline-flex items-center gap-2 rounded-xl bg-ink px-3 py-2 text-xs font-semibold text-white shadow">📦 이사 정리 · 대형폐기물 배출 안내</Link>
       {loaded && visibleBoxes.length === 0 && !error && <p className="mt-2 rounded-2xl bg-white/95 p-4 text-center text-sm shadow">{sourceFilter === 'USER' ? '이 주변에는 승인된 신규 위치 제보가 아직 없어요. 공공자료도 확인해보세요.' : '현재 조회 범위에 표시할 수거함이 없어요.'}</p>}
+    </div>
+    {message && <button type="button" aria-live="polite" aria-label={`${message} · 닫기`} onClick={() => setMessage('')} className="absolute bottom-36 left-4 z-10 max-w-[calc(100%-2rem)] rounded-full bg-white/95 px-3 py-2 text-left text-xs font-medium text-ink shadow-lg sm:bottom-24 sm:text-sm">
+      <span aria-hidden="true" className="mr-1.5 text-leaf">ⓘ</span>{message}
+    </button>}
+    <div className="absolute bottom-24 right-4 z-10 flex flex-col items-end">
+      {showMapTip && <div id="map-tip" className="mb-2 w-64 rounded-2xl bg-white/95 p-4 text-xs leading-5 text-ink shadow-lg">
+        <p className="font-bold">지도 표시 안내</p>
+        <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1">
+          {sourceFilter !== 'USER' && <span className="inline-flex items-center gap-1.5"><i className="h-2.5 w-2.5 rounded-full bg-[#20845a]" />공공자료</span>}
+          {sourceFilter !== 'PUBLIC' && <span className="inline-flex items-center gap-1.5"><i className="h-2.5 w-2.5 rounded-full bg-[#2878e5]" />사용자 제보</span>}
+        </div>
+        <p className="mt-2 text-gray-600">{sourceFilter === 'USER' ? '관리자가 승인한 신규 위치 제보만 표시해요.' : '공공자료 좌표는 실제 설치 위치와 다를 수 있어요.'}</p>
+      </div>}
+      <button type="button" aria-expanded={showMapTip} aria-controls="map-tip" onClick={() => setShowMapTip(value => !value)} className="rounded-full bg-white/95 px-3 py-2 text-xs font-semibold text-ink shadow-lg">
+        ⓘ 지도 팁{loaded && ` · ${visibleBoxes.length}곳`}
+      </button>
     </div>
     <div className="absolute bottom-6 left-4 right-4 z-10 mx-auto flex max-w-xl items-end justify-between">
       <button onClick={locate} className="flex items-center gap-2 rounded-full bg-white px-5 py-4 font-semibold shadow-lg">
