@@ -1,0 +1,19 @@
+services:
+  db:
+    image: postgis/postgis:17-3.6
+    platform: linux/amd64
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    environment:
+      POSTGRES_DB: ${DB_NAME:-clothmap}
+      POSTGRES_USER: ${DB_USER:-clothmap}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-clothmap} -d ${DB_NAME:-clothmap}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+volumes:
+  pgdata:

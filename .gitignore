@@ -1,0 +1,13 @@
+.env
+.env.local
+.env.*.local
+!*.example
+**/node_modules/
+**/.next/
+**/.next-build/
+**/build/
+**/.gradle/
+.DS_Store
+**/*.tsbuildinfo
+/.gradle-user-home/
+/api/data/
